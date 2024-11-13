@@ -100,44 +100,54 @@ class TransaksiController extends Controller
         $request->validate([
             'kasir_id' => 'required|exists:kasirs,id',
             'metode_pembayaran_id' => 'required|exists:jenis_pembayaran,id',
-            'produk' => 'nullable|array', // Ubah 'required' menjadi 'nullable'
-            'produk.*.barang_id' => 'nullable|exists:barangs,id', // Ubah 'required' menjadi 'nullable'
-            'produk.*.jumlah' => 'nullable|integer|min:1', // Ubah 'required' menjadi 'nullable'
+            'produk' => 'nullable|array', 
+            'produk.*.barang_id' => 'nullable|exists:barangs,id', 
+            'produk.*.jumlah' => 'nullable|integer|min:1', 
         ]);
-
+    
         // Update transaksi
         $transaksi = Transaksi::findOrFail($id);
         $transaksi->update([
             'kasir_id' => $request->kasir_id,
             'metode_pembayaran_id' => $request->metode_pembayaran_id,
-            'status' => 'pending', // Status diset ke pending saat update
+            'status' => 'pending', 
         ]);
-
-        // Update total dan detail transaksi
+    
+        // Hapus detail transaksi lama
+        $transaksi->detail()->delete();
+    
         $total = 0;
-        
-        // Periksa jika ada produk yang dipilih
-        if ($request->has('produk')) {
-            foreach ($request->produk as $item) {
+    
+        // Pastikan produk adalah array yang valid
+        $produk = $request->input('produk', []); // Default menjadi array kosong jika tidak ada produk
+    
+        if (!empty($produk)) {
+            foreach ($produk as $item) {
                 if (isset($item['barang_id']) && $item['barang_id']) {
                     $barang = Barang::find($item['barang_id']);
-                    $total += $barang->harga * $item['jumlah'];
-
-                    // Kurangi stok
-                    $barang->stok -= $item['jumlah'];
-                    $barang->save();
-
-                    // Simpan atau update detail transaksi
-                    TransaksiDetail::updateOrCreate(
-                        ['transaksi_id' => $transaksi->id, 'barang_id' => $barang->id],
-                        ['jumlah' => $item['jumlah'], 'harga' => $barang->harga]
-                    );
+                    
+                    if ($barang && $barang->stok >= $item['jumlah']) {
+                        $total += $barang->harga * $item['jumlah'];
+    
+                        $barang->stok -= $item['jumlah'];
+                        $barang->save();
+    
+                        // Simpan detail transaksi
+                        TransaksiDetail::create([
+                            'transaksi_id' => $transaksi->id,
+                            'barang_id' => $barang->id,
+                            'jumlah' => $item['jumlah'],
+                            'harga' => $barang->harga,
+                        ]);
+                    } else {
+                        return back()->withErrors(['produk' => 'Stok produk tidak cukup untuk ' . $barang->nama_barang]);
+                    }
                 }
             }
         }
-
+    
         $transaksi->update(['total' => $total]);
-
+    
         return redirect()->route('transaksi.index');
     }
 

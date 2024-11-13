@@ -43,21 +43,27 @@
                     </td>
                     
                     <td>
-                        <!-- Tombol Edit Transaksi -->
-                        <a href="{{ route('transaksi.edit', $transaksi->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                        <!-- Tombol Edit Transaksi dengan Ikon -->
+                        <a href="{{ route('transaksi.edit', $transaksi->id) }}" class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i>
+                        </a>
                         
-                        <!-- Form delete transaksi -->
+                        <!-- Form delete transaksi dengan Ikon -->
                         <form action="{{ route('transaksi.destroy', $transaksi->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">Hapus</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus transaksi ini?')">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </form>
+
+                        <!-- Tombol Tandai Selesai dengan Ikon -->
                         @if($transaksi->status != 'selesai')
                         <form action="{{ route('transaksi.selesai', $transaksi->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('PATCH')
                             <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Apakah Anda yakin ingin menyelesaikan transaksi ini?')">
-                                Tandai Selesai
+                                <i class="fa fa-check"></i>
                             </button>
                         </form>
                         @endif
@@ -66,4 +72,4 @@
             @endforeach
         </tbody>
     </table>
-@endsection
+@endsection 

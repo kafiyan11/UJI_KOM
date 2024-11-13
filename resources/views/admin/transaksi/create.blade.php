@@ -18,6 +18,7 @@
         <div class="form-group">
             <label for="metode_pembayaran_id">Metode Pembayaran</label>
             <select name="metode_pembayaran_id" id="metode_pembayaran_id" class="form-control" required>
+                <option value="">--- Pilih Metode ---</option>
                 @foreach($metodePembayaran as $metode)
                     <option value="{{ $metode->id }}" data-no-rekening="{{ $metode->no_rekening }}" data-gambar="{{ $metode->gambar }}">
                         {{ $metode->nama }} ({{ $metode->kategori }})

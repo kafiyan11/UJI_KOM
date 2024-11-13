@@ -17,7 +17,7 @@ class Transaksi extends Model
     {
         return $this->hasMany(TransaksiDetail::class);
     }
-
+    
     public function kasir()
     {
         return $this->belongsTo(Kasir::class);
@@ -27,8 +27,9 @@ class Transaksi extends Model
     {
         return $this->belongsTo(JenisPembayaran::class);
     }
+
     public function detail()
     {
-        return $this->hasMany(TransaksiDetail::class, 'transaksi_id');
+        return $this->hasMany(TransaksiDetail::class);
     }
 }
